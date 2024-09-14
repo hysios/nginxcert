@@ -42,7 +42,7 @@ server {
 `)
 
 	// 运行测试
-	domains, err := ParseConfigs(tempDir)
+	domains, err := ParseConfigs(tempDir, false)
 	if err != nil {
 		t.Fatalf("ParseConfigs failed: %v", err)
 	}

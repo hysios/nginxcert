@@ -49,7 +49,7 @@ func main() {
 	if *debug {
 		log.Printf("Parsing Nginx configs from: %s", configDir)
 	}
-	domains, err := nginx.ParseConfigs(configDir)
+	domains, err := nginx.ParseConfigs(configDir, *debug)
 	if err != nil {
 		log.Fatalf("Failed to parse Nginx configs: %v", err)
 	}

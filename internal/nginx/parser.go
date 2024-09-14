@@ -1,6 +1,7 @@
 package nginx
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/hysios/nginxcert/internal/common"
 )
 
-func ParseConfigs(configDir string) ([]common.Domain, error) {
+func ParseConfigs(configDir string, debug bool) ([]common.Domain, error) {
 	var domains []common.Domain
 
 	err := filepath.Walk(configDir, func(path string, info os.FileInfo, err error) error {
@@ -26,6 +27,9 @@ func ParseConfigs(configDir string) ([]common.Domain, error) {
 			}
 			config, err := p.Parse()
 			if err != nil {
+				if debug {
+					log.Printf("Failed to parse Nginx config: %v", err)
+				}
 				return nil // 继续处理其他文件
 			}
 
