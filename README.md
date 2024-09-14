@@ -58,7 +58,7 @@ NginxCert 是一个自动化工具，用于管理 Nginx 服务器的 SSL 证书�
 2. 运行 NginxCert：
 
    ```
-   ./nginxcert -config-path /path/to/nginx/conf.d -author your@email.com -ssl-path /path/to/ssl/certs [-domain-filter domain1.com,domain2.com]
+   ./nginxcert -config-path /path/to/nginx/conf.d -author your@email.com -ssl-path /path/to/ssl/certs [-domain-filter domain1.com,domain2.com] [-debug]
    ```
 
    参数说明：
@@ -67,6 +67,7 @@ NginxCert 是一个自动化工具，用于管理 Nginx 服务器的 SSL 证书�
    - `-ssl-path`: SSL 证书保存路径
    - `-validity`: 证书有效期（天数，默认为 90）
    - `-domain-filter`: 可选，逗号分隔的域名列表，只处理这些域名（为空则处理所有域名）
+   - `-debug`: 可选，启用调试模式，输出详细的处理信息
 
 ## 配置
 

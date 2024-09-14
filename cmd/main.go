@@ -13,12 +13,19 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	author := flag.String("author", "", "Author of the certificates")
 	defaultSSLPath := flag.String("ssl-path", "", "Default SSL path")
 	config := flag.String("config-path", "", "Nginx config path")
 	validity := flag.Int("validity", 90, "Validity period of the certificates")
 	domainFilter := flag.String("domain-filter", "", "Comma-separated list of domains to process (empty for all)")
+	debug := flag.Bool("debug", false, "Enable debug mode")
 	flag.Parse()
+
+	if *debug {
+		log.Println("Debug mode enabled")
+	}
 
 	configDir := *config
 	if configDir == "" || *defaultSSLPath == "" || *author == "" {
@@ -33,12 +40,21 @@ func main() {
 		for _, domain := range strings.Split(*domainFilter, ",") {
 			allowedDomains[strings.TrimSpace(domain)] = true
 		}
+		if *debug {
+			log.Printf("Domain filter applied: %v", allowedDomains)
+		}
 	}
 
 	// 解析Nginx配置
+	if *debug {
+		log.Printf("Parsing Nginx configs from: %s", configDir)
+	}
 	domains, err := nginx.ParseConfigs(configDir)
 	if err != nil {
 		log.Fatalf("Failed to parse Nginx configs: %v", err)
+	}
+	if *debug {
+		log.Printf("Found %d domains in Nginx configs", len(domains))
 	}
 
 	user := &certificate.MyUser{
@@ -47,17 +63,32 @@ func main() {
 
 	// 为每个域名生成证书
 	for _, domain := range domains {
+		if *debug {
+			log.Printf("Processing domain: %s", domain.Name)
+		}
+
 		// 应用域名过滤器
 		if allowedDomains != nil && !allowedDomains[domain.Name] {
-			log.Printf("Skipping domain %s (not in filter)", domain.Name)
+			if *debug {
+				log.Printf("Skipping domain %s (not in filter)", domain.Name)
+			}
 			continue
 		}
 
 		if !domain.SignTime.IsZero() && time.Since(domain.SignTime) < time.Duration(*validity-3)*24*time.Hour {
-			log.Printf("Certificate for %s already exists and is valid for another %d days", domain.Name, *validity-3)
+			if *debug {
+				log.Printf("Certificate for %s already exists and is valid for another %d days", domain.Name, *validity-3)
+			}
 			continue
+		} else {
+			if *debug {
+				log.Printf("Certificate time at %s", domain.SignTime)
+			}
 		}
 
+		if *debug {
+			log.Printf("Generating certificate for %s", domain.Name)
+		}
 		_, _, err := certificate.GenerateCertificate(user, *defaultSSLPath, &domain)
 		if err != nil {
 			log.Printf("Failed to generate certificate for %s: %v", domain.Name, err)
@@ -65,10 +96,16 @@ func main() {
 		}
 
 		if domain.ConfigPath == "" {
+			if *debug {
+				log.Printf("No config path for domain %s, skipping config update", domain.Name)
+			}
 			continue
 		}
 
 		// 更新Nginx配置
+		if *debug {
+			log.Printf("Updating Nginx config for %s", domain.Name)
+		}
 		err = updater.UpdateCertificatePaths(domain)
 		if err != nil {
 			log.Printf("Failed to update config for %s: %v", domain.Name, err)
