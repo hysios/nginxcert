@@ -6,7 +6,7 @@ toolchain go1.23.0
 
 require (
 	github.com/go-acme/lego/v4 v4.18.0
-	github.com/hysios/gonginx v0.0.1
+	github.com/hysios/gonginx v0.0.2
 )
 
 require (
@@ -28,5 +28,3 @@ require (
 	golang.org/x/tools v0.22.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/hysios/gonginx v0.0.1 => ../../pkgs/gonginx
